@@ -3,6 +3,7 @@ package Request;
 use strict;
 use LWP::UserAgent;
 use HTTP::Request;
+use HTTP::Cookies;
 use JSON;
 
 use Class::MethodMaker [
@@ -13,16 +14,22 @@ use Class::MethodMaker [
 sub init {
     my ($self, $args) = @_;
     $self->ua(new LWP::UserAgent);
+    $self->ua->cookie_jar(new HTTP::Cookies);
 }
 
-sub request {
+sub raw {
     my ($self, $method, $url, $data, $headers) = @_;
 
     $headers = [] if ! $headers;
 
     my $res = $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
     
-    return $res->decoded_content;
+    return $res;
+}
+
+sub request {
+    my ($self, $method, $url, $data, $headers) = @_;
+    return $self->raw($method, $url, $data, $headers)->decoded_content;
 }
 
 sub json {
