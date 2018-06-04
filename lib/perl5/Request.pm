@@ -1,6 +1,7 @@
 package Request;
 
 use strict;
+use Response;
 use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Cookies;
@@ -18,33 +19,53 @@ sub init {
 }
 
 sub raw {
-    my ($self, $method, $url, $data, $headers) = @_;
+    my ($self, $method, $url, $args) = @_;
 
-    $headers = [] if ! $headers;
+    my $headers = $args->{headers} = $args->{headers} || [];
 
-    my $res = $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
-    
-    return $res;
-}
+    my $data = $args->{data};
+
+    return $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
+}    
 
 sub request {
-    my ($self, $method, $url, $data, $headers) = @_;
-    return $self->raw($method, $url, $data, $headers)->decoded_content;
+    my ($self, $method, $url, $args) = @_;
+    return new Response($self->raw($method, $url, $args));
+}
+
+# convenience 
+sub get {
+    my ($self, $url, $args) = @_;
+    return $self->request('GET', $url, $args);
+}
+
+sub post {
+    my ($self, $url, $args) = @_;
+    return $self->request('POST', $url, $args);
+}
+
+sub put {
+    my ($self, $url, $args) = @_;
+    return $self->request('PUT', $url, $args);
+}
+
+sub delete {
+    my ($self, $url, $args) = @_;
+    return $self->request('DELETE', $url, $args);
 }
 
 sub json {
-    my ($self, $method, $url, $data, $headers) = @_;
+    my ($self, $url, $args) = @_;
     
-    my $jheader = { 'Content-Type' => 'application/json' };
+    my $method = $args->{method} || 'POST';
 
-    if (! $headers) {
-        $headers = [ $jheader ];
-    }
-    else {
-        push @$headers, $jheader;
-    }
+    $args->{data} = encode_json($args->{data});
 
-    return decode_json($self->request($method, $url, $data, $headers));
+    $args->{headers} = [] if ! $args->{headers};
+    push @{$args->{headers}}, { 'Content-Type' => 'application/json' };
+
+    return $self->request($method, $url, $args)->json;
 }
 
 1;
+
