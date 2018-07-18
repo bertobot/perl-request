@@ -21,7 +21,7 @@ sub init {
         $self->ua(new LWP::UserAgent( ssl_opts => {
             SSL_use_cert    => 1,
             SSL_version     => $args->{SSL_version} || 'TLSv12',
-            SSL_verify_mode => $args->{SSL_VERIFY_PEER} || IO::Socket::SSL_VERIFY_PEER,
+            SSL_verify_mode => $args->{SSL_VERIFY_PEER} || IO::Socket::SSL::SSL_VERIFY_PEER,
             SSL_ca_file     => $args->{cacert},
             SSL_cert_file   => $args->{cert},
             SSL_key_file    => $args->{key}
