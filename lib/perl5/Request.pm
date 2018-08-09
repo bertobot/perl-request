@@ -41,20 +41,13 @@ sub raw {
 
     my $headers = $args->{headers} || [];
 
-    my $rheaders = new HTTP::Headers;
-   
-    foreach my $h (@$headers) {
-        my ($k, $v) = each %$h;
-        $rheaders->header($k => $v);
-    }
-
     my $data = $args->{data};
 
     if ($args->{tofile}) {
         return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
     }
 
-    return $self->ua->request(new HTTP::Request($method, $url, $rheaders, $data));
+    return $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
 }    
 
 sub request {
@@ -91,7 +84,7 @@ sub json {
     $args->{data} = encode_json($args->{data});
 
     $args->{headers} = [] if ! $args->{headers};
-    push @{$args->{headers}}, { 'Content-Type' => 'application/json' };
+    push @{$args->{headers}}, 'Content-Type' => 'application/json';
 
     return $self->request($method, $url, $args)->json;
 }
