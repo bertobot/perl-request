@@ -39,7 +39,14 @@ sub init {
 sub raw {
     my ($self, $method, $url, $args) = @_;
 
-    my $headers = $args->{headers} = $args->{headers} || [];
+    my $headers = $args->{headers} || [];
+
+    my $rheaders = new HTTP::Headers;
+   
+    foreach my $h (@$headers) {
+        my ($k, $v) = each %$h;
+        $rheaders->header($k => $v);
+    }
 
     my $data = $args->{data};
 
@@ -47,7 +54,7 @@ sub raw {
         return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
     }
 
-    return $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
+    return $self->ua->request(new HTTP::Request($method, $url, $rheaders, $data));
 }    
 
 sub request {
