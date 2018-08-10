@@ -44,7 +44,8 @@ sub raw {
     my $data = $args->{data};
 
     if ($args->{tofile}) {
-        return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
+        #return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
+        return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), $args->{tofile});
     }
 
     return $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
