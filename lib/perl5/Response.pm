@@ -28,4 +28,9 @@ sub body {
     return $self->res->decoded_content;
 }
 
+sub toString {
+    my ($self) = @_;
+    return sprintf("%s %s %s", $self->res->code, $self->res->message, $self->body);
+}
+
 1;
