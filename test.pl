@@ -13,7 +13,8 @@ printf "%s\n", $j->decode('null');
 
 my $req = new Request;
 
-my $res2 = $req->get('https://datahub.io/core/country-list/r/data.json')->json;
+my $res = $req->get('https://datahub.io/core/country-list/r/data.json');
+my $res2 = $res->json;
 print Dumper $res2;
 
 my $res3 = $req->get('https://datahub.io/core/country-list/r/data.json')->body;
