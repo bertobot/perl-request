@@ -31,9 +31,10 @@ sub init {
         $self->ua(new LWP::UserAgent);
     }
 
-    $self->ua->cookie_jar(new HTTP::Cookies);
+    # set timeout
+    $self->ua->timeout($args->{timeout} || 180);
 
-    
+    $self->ua->cookie_jar(new HTTP::Cookies);
 }
 
 sub raw {
