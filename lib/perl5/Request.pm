@@ -43,6 +43,7 @@ sub raw {
     my $headers = $args->{headers} || [];
 
     my $data = $args->{data};
+    $data = undef if defined $data && length($data) == 0;
 
     if ($args->{tofile}) {
         #return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
@@ -76,6 +77,11 @@ sub put {
 sub delete {
     my ($self, $url, $args) = @_;
     return $self->request('DELETE', $url, $args);
+}
+
+sub head {
+    my ($self, $url, $args) = @_;
+    return $self->request('HEAD', $url, $args);
 }
 
 sub json {
