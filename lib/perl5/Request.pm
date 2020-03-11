@@ -40,15 +40,42 @@ sub init {
 sub raw {
     my ($self, $method, $url, $args) = @_;
 
-    my $headers = $args->{headers} || [];
+    my $data;
+    my $headers = $args->{headers} || {};
 
-    my $data = $args->{data};
-    $data = undef if defined $data && length($data) == 0;
+    # try and shape how data is based on headers and method
+
+    if ($args->{json}) {
+        $data = encode_json($args->{json});
+        $headers->{'Content-Type'} = 'application/json';
+    }
+    else {
+        $data = $args->{data};
+        if (defined $data && length($data) > 0) {
+            $headers->{'Content-Type'} = 'application/x-www-form-urlencoded' if ! $headers->{'Content-Type'};
+
+            if (ref($data) eq 'HASH') {
+                $data = join("&", map { sprintf("%s=%s", $_, $data->{$_}) } keys %$data);
+            }
+
+            if ($method =~ /get/i) {
+                $url .= "?$data";
+                $data = undef;
+            }
+        }
+        else {
+            $data = undef;
+        }
+    }
+
+    # finally, turn headers in a list of key=value pairs
+    $headers = [ map { $_ => $headers->{$_} } keys %$headers ];
 
     if ($args->{tofile}) {
         #return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), ':content_file' => $args->{tofile}, ':read_size_hint' => 8192);
         return $self->ua->request(new HTTP::Request($method, $url, $headers, $data), $args->{tofile});
     }
+
 
     return $self->ua->request(new HTTP::Request($method, $url, $headers, $data));
 }    
@@ -86,15 +113,15 @@ sub head {
 
 sub json {
     my ($self, $url, $args) = @_;
-    
     my $method = $args->{method} || 'POST';
-
-    $args->{data} = encode_json($args->{data});
-
-    $args->{headers} = [] if ! $args->{headers};
-    push @{$args->{headers}}, 'Content-Type' => 'application/json';
-
     return $self->request($method, $url, $args)->json;
+}
+
+sub escape {
+    my ($self, $str) = @_;
+    my $result = $str;
+    $result =~ s/([^^A-Za-z0-9\-_.!~*'()])/ sprintf "%%%02x", ord $1 /eg;
+    return $result;
 }
 
 1;
