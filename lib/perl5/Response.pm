@@ -15,7 +15,7 @@ sub init {
 
 sub ok {
     my ($self) = @_;
-    return $self->res->is_success;
+    return $self->res->is_success || $self->res->code < 400;
 }
 
 sub json {
